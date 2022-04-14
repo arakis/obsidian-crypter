@@ -42,6 +42,7 @@ export default class AttributesPlugin extends Plugin {
         return false;
       }
     }
+
     const viewPlugin = ViewPlugin.fromClass(
       class {
         decorations: DecorationSet;
@@ -99,7 +100,7 @@ export default class AttributesPlugin extends Plugin {
 
                 // const tokenProps = type.prop(tokenClassNodeProp);
 
-                console.log(type.name + "|" + type.id);
+                // console.log(type.name + "|" + type.id);
 
                 if (true) {
                   // const props = new Set(tokenProps.split(" "));
@@ -110,7 +111,7 @@ export default class AttributesPlugin extends Plugin {
 
                   // if (type.name == "tag") {
                   let sliceString = view.state.doc.sliceString(from, to)
-                  console.log("Slice (" + from + ", " + to + "): " + sliceString);
+                  // console.log("Slice (" + from + ", " + to + "): " + sliceString);
                   // }
 
                   // console.log(type.name == "tag");
@@ -118,23 +119,34 @@ export default class AttributesPlugin extends Plugin {
 
                   if (type.name == "tag" && sliceString == "crypt") {
                     inTag = true;
-                    console.log("DBG: Found Tag 1");
+                    // console.log("DBG: Found Tag 1");
                   }
 
                   if (type.name == "bracket_tag" && inTag && sliceString == ">") {
                     inContent = true;
                     contentFrom = to;
-                    console.log("DBG: Found Tag 2");
+                    // console.log("DBG: Found Tag 2");
                   }
 
+                  let isCrypt = false;
                   if (type.name == "bracket_tag" && inContent && sliceString == "</") {
-                    console.log("DBG: Found Content");
+                    // console.log("DBG: Found Content");
 
                     inContent = false;
                     inTag = false;
+                    isCrypt = true;
 
-                    let txt2 = view.state.doc.sliceString(contentFrom, from)
-                    console.log("CONTENT: " + txt2);
+                    // let txt2 = view.state.doc.sliceString(contentFrom, from)
+                    // console.log("CONTENT: " + txt2);
+                  }
+
+                  if (isCrypt) {
+                    console.log("widget adding");
+                    let deco = Decoration.widget({
+                      widget: new FoldWidget(false, isHeader),
+                    });
+                    builder.add(contentFrom, to, deco);
+                    console.log("widget added");
                   }
 
                   if (isList || isHeader) {
