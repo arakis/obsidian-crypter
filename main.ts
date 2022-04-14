@@ -1,4 +1,4 @@
-import { Plugin, setIcon } from "obsidian";
+import { Plugin, setIcon, View } from "obsidian";
 import { RangeSetBuilder } from "@codemirror/rangeset";
 import { EditorView, Decoration, DecorationSet, ViewUpdate, WidgetType, ViewPlugin } from "@codemirror/view";
 import { EditorState, EditorSelection, TransactionSpec, Transaction } from "@codemirror/state";
@@ -16,26 +16,51 @@ export default class AttributesPlugin extends Plugin {
   buildAttributesViewPlugin() {
     // build the DOM element that we'll prepend to list elements
     class FoldWidget extends WidgetType {
-      isFolded: boolean;
-      isHeader: boolean;
+      from: number;
+      to: number;
+      view: EditorView;
 
-      constructor(isFolded: boolean, isHeader: boolean = false) {
+      constructor(view: EditorView, from: number, to: number) {
         super();
-        this.isFolded = isFolded;
-        this.isHeader = isHeader;
+        this.view = view;
+        this.from = from;
+        this.to = to;
       }
 
       eq(other: FoldWidget) {
-        return other.isFolded == this.isFolded;
+        return this.from == other.from
       }
 
       toDOM() {
-        let el = document.createElement("input");
+
+        let el: HTMLInputElement = document.createElement("input");
+        el.type = "text";
         // el.className = "cm-fold-widget collapse-indicator collapse-icon";
         // if (this.isFolded) el.addClass("is-collapsed");
         // this.isHeader ? el.addClass("heading-collapse-indicator") : el.addClass("list-collapse-indicator");
         // setIcon(el, "right-triangle", 8);
         el.setAttr("type", "text");
+        el.style.caretColor = "initial";
+
+        let view = this.view;
+        let from = this.from;
+        let to = this.to;
+
+        el.addEventListener("change", function (e) {
+          let encrypted = el.value.split("").reverse().join("");
+          // var txt = new Text(encrypted);
+          // view.state.doc.replace(from, to, txt);
+
+          let changes = []
+          changes.push({ from: from, to: to, insert: encrypted });
+          view.dispatch({ changes })
+
+        }, false);
+
+        let sliceString = this.view.state.doc.sliceString(this.from, this.to)
+        let decrypted = sliceString.split("").reverse().join("");
+        el.value = decrypted;
+
         return el;
       }
 
@@ -151,7 +176,7 @@ export default class AttributesPlugin extends Plugin {
                   if (isCrypt) {
                     console.log("widget adding (" + contentFrom + ", " + contentTo + ")");
                     let deco = Decoration.replace({
-                      widget: new FoldWidget(false, isHeader),
+                      widget: new FoldWidget(view, contentFrom, contentTo),
                       inclusive: true,
                     });
                     builder.add(tagFrom, tagTo, deco);
