@@ -31,10 +31,11 @@ export default class AttributesPlugin extends Plugin {
 
       toDOM() {
         let el = document.createElement("div");
-        el.className = "cm-fold-widget collapse-indicator collapse-icon";
-        if (this.isFolded) el.addClass("is-collapsed");
-        this.isHeader ? el.addClass("heading-collapse-indicator") : el.addClass("list-collapse-indicator");
-        setIcon(el, "right-triangle", 8);
+        // el.className = "cm-fold-widget collapse-indicator collapse-icon";
+        // if (this.isFolded) el.addClass("is-collapsed");
+        // this.isHeader ? el.addClass("heading-collapse-indicator") : el.addClass("list-collapse-indicator");
+        // setIcon(el, "right-triangle", 8);
+        el.innerText = "SAMPLE";
         return el;
       }
 
@@ -142,10 +143,12 @@ export default class AttributesPlugin extends Plugin {
 
                   if (isCrypt) {
                     console.log("widget adding");
-                    let deco = Decoration.widget({
+                    let deco = Decoration.replace({
                       widget: new FoldWidget(false, isHeader),
+                      inclusive: true,
+                      block: false,
                     });
-                    builder.add(contentFrom, to, deco);
+                    builder.add(contentFrom, from, deco);
                     console.log("widget added");
                   }
 
