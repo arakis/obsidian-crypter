@@ -30,17 +30,17 @@ export default class AttributesPlugin extends Plugin {
       }
 
       toDOM() {
-        let el = document.createElement("div");
+        let el = document.createElement("input");
         // el.className = "cm-fold-widget collapse-indicator collapse-icon";
         // if (this.isFolded) el.addClass("is-collapsed");
         // this.isHeader ? el.addClass("heading-collapse-indicator") : el.addClass("list-collapse-indicator");
         // setIcon(el, "right-triangle", 8);
-        el.innerText = "SAMPLE";
+        el.setAttr("type", "text");
         return el;
       }
 
       ignoreEvent() {
-        return false;
+        return true;
       }
     }
 
@@ -90,6 +90,10 @@ export default class AttributesPlugin extends Plugin {
             var inContent = false;
 
             let contentFrom: number;
+            let contentTo: number;
+
+            let tagFrom: number;
+            let tagTo: number;
 
             tree.iterate({
               from,
@@ -118,7 +122,8 @@ export default class AttributesPlugin extends Plugin {
                   // console.log(type.name == "tag");
                   // console.log(txt == "crypt");
 
-                  if (type.name == "tag" && sliceString == "crypt") {
+                  if (type.name == "tag" && sliceString == "secret") {
+                    tagFrom = from - 1;
                     inTag = true;
                     // console.log("DBG: Found Tag 1");
                   }
@@ -131,6 +136,8 @@ export default class AttributesPlugin extends Plugin {
 
                   let isCrypt = false;
                   if (type.name == "bracket_tag" && inContent && sliceString == "</") {
+                    contentTo = from;
+                    tagTo = from + "</secret>".length;
                     // console.log("DBG: Found Content");
 
                     inContent = false;
@@ -142,55 +149,54 @@ export default class AttributesPlugin extends Plugin {
                   }
 
                   if (isCrypt) {
-                    console.log("widget adding");
+                    console.log("widget adding (" + contentFrom + ", " + contentTo + ")");
                     let deco = Decoration.replace({
                       widget: new FoldWidget(false, isHeader),
                       inclusive: true,
-                      block: false,
                     });
-                    builder.add(contentFrom, from, deco);
+                    builder.add(tagFrom, tagTo, deco);
                     console.log("widget added");
                   }
 
-                  if (isList || isHeader) {
-                    // add a fold icon, inline, next to every foldable list item
-                    // TODO: fix the naive negative margin in styles.css
-                    let range,
-                      line = view.state.doc.lineAt(from);
-                    if ((range = foldable(view.state, line.from, line.to))) {
-                      const isFolded = foldExists(view.state, range.from, range.to);
-                      let deco = Decoration.widget({
-                        widget: new FoldWidget(isFolded, isHeader),
-                      });
-                      builder.add(from, from, deco);
-                    }
-                  }
-                  if (isTag) {
-                    // This adds a data-tags attribute to the parent cm-line.
-                    // The attribute value will be a list of all tags found on the line
-                    // TODO: this currently recomputes the entire list of hashtags for a given
-                    // line once for every hashtag found. it works but it could be better.
-                    let line = view.state.doc.lineAt(from);
-                    let deco = Decoration.line({
-                      attributes: { "data-tags": line.text.match(hashTagRegexp)?.join(" ").replace(/#/g, "") },
-                    });
-                    // TODO: Figure out a better way to fix the pos conflict when
-                    //       a top level list item has a hashtag at the beginning of the line
-                    // The code below is a hack using internal class properties
-                    if ((<any>builder).lastFrom == line.from) {
-                      // if we don't do this, we get an error stating our rangeset is not sorted
-                      deco.startSide = (<any>builder).last.startSide + 1;
-                    }
-                    builder.add(line.from, line.from, deco);
-                  }
-                  if (isBarelink) {
-                    // add the value of barelinks as an href on the inline element
-                    // this will cause a nested span to be created
-                    let deco = Decoration.mark({
-                      attributes: { href: view.state.doc.sliceString(from, to) },
-                    });
-                    builder.add(from, to, deco);
-                  }
+                  // if (isList || isHeader) {
+                  //   // add a fold icon, inline, next to every foldable list item
+                  //   // TODO: fix the naive negative margin in styles.css
+                  //   let range,
+                  //     line = view.state.doc.lineAt(from);
+                  //   if ((range = foldable(view.state, line.from, line.to))) {
+                  //     const isFolded = foldExists(view.state, range.from, range.to);
+                  //     let deco = Decoration.widget({
+                  //       widget: new FoldWidget(isFolded, isHeader),
+                  //     });
+                  //     builder.add(from, from, deco);
+                  //   }
+                  // }
+                  // if (isTag) {
+                  //   // This adds a data-tags attribute to the parent cm-line.
+                  //   // The attribute value will be a list of all tags found on the line
+                  //   // TODO: this currently recomputes the entire list of hashtags for a given
+                  //   // line once for every hashtag found. it works but it could be better.
+                  //   let line = view.state.doc.lineAt(from);
+                  //   let deco = Decoration.line({
+                  //     attributes: { "data-tags": line.text.match(hashTagRegexp)?.join(" ").replace(/#/g, "") },
+                  //   });
+                  //   // TODO: Figure out a better way to fix the pos conflict when
+                  //   //       a top level list item has a hashtag at the beginning of the line
+                  //   // The code below is a hack using internal class properties
+                  //   if ((<any>builder).lastFrom == line.from) {
+                  //     // if we don't do this, we get an error stating our rangeset is not sorted
+                  //     deco.startSide = (<any>builder).last.startSide + 1;
+                  //   }
+                  //   builder.add(line.from, line.from, deco);
+                  // }
+                  // if (isBarelink) {
+                  //   // add the value of barelinks as an href on the inline element
+                  //   // this will cause a nested span to be created
+                  //   let deco = Decoration.mark({
+                  //     attributes: { href: view.state.doc.sliceString(from, to) },
+                  //   });
+                  //   builder.add(from, to, deco);
+                  // }
                 }
               },
             });
