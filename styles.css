@@ -1,0 +1,13 @@
+.secret {
+    caret-color: initial !important;
+    margin: 0;
+    padding: 0;
+    user-select: initial;
+}
+
+.ͼ4 .cm-line .secret::selection,
+.ͼ4 .cm-line.secret::selection,
+.ͼ4 .secret::selection,
+.secret::selection {
+    background-color: default !important;
+}

@@ -35,6 +35,7 @@ export default class AttributesPlugin extends Plugin {
 
         let el: HTMLInputElement = document.createElement("input");
         el.type = "text";
+        el.className = "secret";
         // el.className = "cm-fold-widget collapse-indicator collapse-icon";
         // if (this.isFolded) el.addClass("is-collapsed");
         // this.isHeader ? el.addClass("heading-collapse-indicator") : el.addClass("list-collapse-indicator");
