@@ -1,7 +1,15 @@
-.secret {
+.ͼ4 .cm-line .secret {
     caret-color: initial !important;
-    margin: 0;
-    padding: 0;
+    margin-left: 0px;
+    margin-right: 0px;
+    margin-top: -3px;
+    margin-bottom: -3px;
+
+    padding-top: 0px;
+    padding-bottom: 0px;
+    padding-left: 5px;
+    padding-right: 5px;
+
     user-select: initial;
 }
 
@@ -9,5 +17,5 @@
 .ͼ4 .cm-line.secret::selection,
 .ͼ4 .secret::selection,
 .secret::selection {
-    background-color: default !important;
+    background-color: var(--text-selection) !important;
 }
