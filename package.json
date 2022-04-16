@@ -18,6 +18,7 @@
 		"@codemirror/language": "latest",
 		"@codemirror/stream-parser": "latest",
 		"@codemirror/fold": "latest",
+		"@lezer/common": "latest",
 		"builtin-modules": "^3.2.0",
 		"esbuild": "0.13.12",
 		"obsidian": "latest",
